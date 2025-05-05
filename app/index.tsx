@@ -42,40 +42,48 @@ export default function Index() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#0b0b25' }}>
-            <ScrollView contentContainerStyle={{ padding: 20 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white', textAlign: 'center', marginBottom: 20 }}>
+            <View style={{ flex:1, padding: 20 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white', textAlign: 'center', marginBottom: 40 }}>
                     AI Logo
                 </Text>
 
-                <Text style={{ fontSize: 24, fontWeight: '600', color: 'white', marginBottom: 8 }}>
-                    Enter Your Prompt
-                </Text>
+
+
+                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
+                    <Text style={{ fontSize: 25, fontWeight: '600', color: 'white' }}>
+                        Enter Your Prompt
+                    </Text>
+                    <TouchableOpacity>
+                        <Text style={{color:'white', alignItems:'center'}}>🎲 Surprise me</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <View
-                    style={{
-                        backgroundColor: '#1b1b38',
+                    style={[{
+                        backgroundColor: '#27272A',
                         borderRadius: 16,
                         padding: 16,
-                        marginBottom: 24,
-                    }}
+                        marginBottom: 24
+                    },prompt?{borderColor: 'white', borderWidth: 1}:{}]}
                 >
                     <TextInput
                         placeholder="A blue lion logo reading 'HEXA' in bold letters"
-                        placeholderTextColor="#999"
+                        placeholderTextColor="#71717A"
                         style={{
                             color: 'white',
-                            fontSize: 14,
-                            minHeight: 80,
+                            fontSize: 18,
+                            minHeight: 150,
                             textAlignVertical: 'top',
                         }}
                         multiline
                         maxLength={500}
+                        numberOfLines={10}
                         value={prompt}
                         onChangeText={setPrompt}
                     />
                 </View>
 
-                <Text style={{ fontSize: 16, fontWeight: '600', color: 'white', marginBottom: 8 }}>
+                <Text style={{ fontSize: 22, fontWeight: '600', color: 'white', marginBottom: 10 }}>
                     Logo Styles
                 </Text>
 
@@ -86,19 +94,20 @@ export default function Index() {
                         <TouchableOpacity
                             key={style.id}
                             onPress={() => setSelectedStyle(style.id)}
-                            style={{
-                                backgroundColor: selectedStyle === style.id ? '#2f2fa2' : '#1b1b38',
-                                padding: 10,
-                                borderRadius: 12,
-                                alignItems: 'center',
-                                width: 70,
-                            }}
                         >
-                            <Image source={style.icon} style={{ width: 40, height: 40, marginBottom: 6 }} />
+                            <Image
+                                source={style.icon}
+                                style={{
+                                    borderWidth: 1,
+                                    borderRadius: 12,
+                                    width: 100,
+                                    height: 100,
+                                    marginBottom: 6
+                            }} />
                             <Text
                                 style={{
                                     fontSize: 12,
-                                    color: 'white',
+                                    color: selectedStyle === style.id ? 'white' : '#71717A',
                                     textAlign: 'center',
                                 }}
                             >
@@ -108,10 +117,9 @@ export default function Index() {
                     ))}
                 </View>
                 </ScrollView>
-
-
                 <TouchableOpacity
                     style={{
+                        justifyContent:'flex-end',
                         backgroundColor: '#6943ff',
                         paddingVertical: 16,
                         borderRadius: 30,
@@ -122,7 +130,7 @@ export default function Index() {
                         Create ✨
                     </Text>
                 </TouchableOpacity>
-            </ScrollView>
+            </View>
         </SafeAreaView>
     );
 

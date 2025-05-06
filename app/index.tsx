@@ -8,6 +8,7 @@ import {
     Image,
     SafeAreaView,
 } from 'react-native';
+import DesignStatusCard from "@/app/components/DesignStatusCard";
 
 const logoStyles = [
     {
@@ -47,7 +48,13 @@ export default function Index() {
                     AI Logo
                 </Text>
 
+                <DesignStatusCard status="loading" />
 
+                {/* Or for success */}
+                 <DesignStatusCard status="success" onPress={() => console.log('Tapped!')} image={require('../assets/images/logo_styles/mock_result.png')} />
+
+                {/* Or for error */}
+                 <DesignStatusCard status="error" onPress={()=>{}} />
 
                 <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
                     <Text style={{ fontSize: 25, fontWeight: '600', color: 'white' }}>

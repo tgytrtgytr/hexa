@@ -8,7 +8,11 @@ type Props = {
 };
 
 export default function DesignStatusCard({ status, onPress, image }: Props) {
-    if (status === 'loading') {
+    const isLoading = status === 'loading';
+    const isSuccess = status === 'success';
+    const isError = status === 'error';
+    
+    if (isLoading) {
         return (
             <View style={styles.card}>
                 <ActivityIndicator size="large" color="#fff" style={styles.loader} />
@@ -20,7 +24,7 @@ export default function DesignStatusCard({ status, onPress, image }: Props) {
         );
     }
 
-    if (status === 'success') {
+    if (isSuccess) {
         return (
             <TouchableOpacity onPress={onPress} style={[styles.card, styles.successCard]}>
                 {image && <Image source={image} style={styles.previewImage} />}
@@ -32,7 +36,7 @@ export default function DesignStatusCard({ status, onPress, image }: Props) {
         );
     }
 
-    if (status === 'error') {
+    if (isError) {
         return (
             <TouchableOpacity onPress={onPress} style={[styles.card, styles.errorCard]}>
                 <Image source={require('../../assets/images/error_result.png')} style={styles.previewImage} />
@@ -40,8 +44,6 @@ export default function DesignStatusCard({ status, onPress, image }: Props) {
                     <Text style={styles.successText}>Oops, something went wrong!</Text>
                     <Text style={styles.cardSubtitle}>Click to try again.</Text>
                 </View>
-                {/*<Text style={styles.errorText}>Oops, something went wrong!</Text>*/}
-                {/*<Text style={styles.cardSubtitle}>Click to try again.</Text>*/}
             </TouchableOpacity>
         );
     }

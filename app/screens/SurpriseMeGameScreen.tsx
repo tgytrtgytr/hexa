@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, Alert } from 'react-native';
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -15,12 +17,15 @@ const SurpriseMeGameScreen = () => {
     const [gameOver, setGameOver] = useState(false);
     const playerBottom = useRef(new Animated.Value(0)).current;
 
+    const router = useRouter();
+
     const playerSize = 50;
     const jumpHeight = 250;
     const groundLevel = 0;
 
     const startTimer = () => {
         if (timerRef.current) clearInterval(timerRef.current);
+        // @ts-ignore
         timerRef.current = setInterval(() => {
             setScore((prev) => {
                 if (prev + 1 >= 5 && !rewardShown) {
@@ -54,7 +59,7 @@ const SurpriseMeGameScreen = () => {
         startObstacle();
         const interval = setInterval(() => {
             checkCollision();
-        }, 50);
+        }, 5);
 
         return () => clearInterval(interval);
     }, []);
@@ -88,6 +93,8 @@ const SurpriseMeGameScreen = () => {
                 setGameOver(true);
                 obstacleAnim.current?.stop();
                 timerRef.current && clearInterval(timerRef.current);
+                setGameOver(true);
+                obstacleAnim.current?.stop();
             }
         });
     };
@@ -112,7 +119,15 @@ const SurpriseMeGameScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>🎉 Surprise Me Game</Text>
+            {/* Top Bar */}
+            <View style={styles.topBar}>
+                <Text style={styles.topTitle}>🎉 Surprise Me Game</Text>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="close" size={28} color="#fff" />
+                </TouchableOpacity>
+            </View>
+
+
             <Text style={styles.scoreText}>⏱ Score: {score}</Text>
 
             {gameOver && !rewardShown && <Text style={styles.failText}>Sorry you couldnot reach 5 seconds!</Text>}
@@ -223,6 +238,17 @@ const styles = StyleSheet.create({
         color: 'red',
         marginTop: 10,
         fontWeight: 'bold',
+    },
+    topBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    topTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#fff',
     },
 });
 

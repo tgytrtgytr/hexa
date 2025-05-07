@@ -13,8 +13,8 @@ export default function DesignStatusCard({ status, onPress, image }: Props) {
             <View style={styles.card}>
                 <ActivityIndicator size="large" color="#fff" style={styles.loader} />
                 <View>
-                    <Text style={styles.successText}>Your Design is Ready!</Text>
-                    <Text style={styles.cardSubtitle}>Tap to see it.</Text>
+                    <Text style={styles.successText}>Creating Your Design...</Text>
+                    <Text style={styles.cardSubtitle}>Ready in 2 minutes</Text>
                 </View>
             </View>
         );

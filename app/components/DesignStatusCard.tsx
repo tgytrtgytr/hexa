@@ -11,7 +11,7 @@ export default function DesignStatusCard({ status, onPress, image }: Props) {
     const isLoading = status === 'loading';
     const isSuccess = status === 'success';
     const isError = status === 'error';
-    
+
     if (isLoading) {
         return (
             <View style={styles.card}>
@@ -50,6 +50,7 @@ export default function DesignStatusCard({ status, onPress, image }: Props) {
 
     return null;
 }
+
 
 const styles = StyleSheet.create({
     card: {
@@ -100,5 +101,5 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 16,
         marginRight: 16,
         backgroundColor: '#fff',
-    },
+    }
 });

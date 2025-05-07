@@ -9,7 +9,9 @@ import {
     Image,
     SafeAreaView,
     StyleSheet,
+    ImageBackground
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { db } from '@/firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
@@ -34,6 +36,7 @@ export default function Index() {
     const router = useRouter();
     const storage = getStorage();
 
+    //connecting firestorage to access Logo Styles collection
     useEffect(() => {
         const fetchData = async () => {
             const colRef = collection(db, 'logoStyles');
@@ -51,6 +54,7 @@ export default function Index() {
         fetchData();
     }, []);
 
+    //connect backend to processWithRandomDelay method
     const callCloudFunction = async () => {
         setError(false);
         setLoading(true);
@@ -73,73 +77,86 @@ export default function Index() {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                <Text style={styles.heading}>AI Logo</Text>
+            <ImageBackground
+                source={require('../assets/images/back_gradient.png')} // local image
+                style={styles.background}
+                resizeMode="cover"
+            >
+                <View style={styles.container}>
+                        <Text style={styles.heading}>AI Logo</Text>
 
-                {loading && <DesignStatusCard status="loading" />}
-                {responseMessage && (
-                    <DesignStatusCard
-                        status="success"
-                        onPress={() => router.push('/outputScreen')}
-                        image={require('../assets/images/logo_styles/mock_result.png')}
-                    />
-                )}
-                {error && <DesignStatusCard status="error" onPress={() => {}} />}
+                    {loading && <DesignStatusCard status="loading" />}
+                    {responseMessage && (
+                        <DesignStatusCard
+                            status="success"
+                            onPress={() => router.push('/outputScreen')}
+                            image={require('../assets/images/logo_styles/mock_result.png')}
+                        />
+                    )}
+                    {error && <DesignStatusCard status="error" onPress={() => {}} />}
 
-                <View style={styles.promptHeader}>
-                    <Text style={styles.subheading}>Enter Your Prompt</Text>
-                    <TouchableOpacity onPress={() => router.push('/screens/SurpriseMeGameScreen')}>
-                        <Text style={styles.surpriseMe}>🎲 Surprise me</Text>
-                    </TouchableOpacity>
-                </View>
 
-                <View style={[styles.inputWrapper, prompt && styles.inputActive]}>
-                    <TextInput
-                        placeholder="A blue lion logo reading 'HEXA' in bold letters"
-                        placeholderTextColor="#71717A"
-                        style={styles.textInput}
-                        multiline
-                        maxLength={500}
-                        numberOfLines={10}
-                        value={prompt}
-                        onChangeText={setPrompt}
-                    />
-                    <Text style={styles.counter}>{prompt.length}/500</Text>
-                </View>
-
-                <Text style={styles.styleLabel}>Logo Styles</Text>
-
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.styleRow}>
-                        {logoStyles.map((style) => (
-                            <TouchableOpacity
-                                key={style.id}
-                                onPress={() => setSelectedStyle(style.id)}
-                            >
-                                <Image
-                                    source={{ uri: style.imageUrl }}
-                                    style={styles.styleImage}
-                                />
-                                <Text
-                                    style={[
-                                        styles.styleName,
-                                        selectedStyle === style.id && styles.selectedStyleText
-                                    ]}
-                                >
-                                    {style.name}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                    <View style={styles.promptHeader}>
+                        <Text style={styles.subheading}>Enter Your Prompt</Text>
+                        <TouchableOpacity onPress={() => router.push('/screens/SurpriseMeGameScreen')}>
+                            <Text style={styles.surpriseMe}>🎲 Surprise me</Text>
+                        </TouchableOpacity>
                     </View>
-                </ScrollView>
 
-                <TouchableOpacity
-                    onPress={callCloudFunction}
-                    style={styles.createButton}
-                >
-                    <Text style={styles.createButtonText}>Create ✨</Text>
-                </TouchableOpacity>
-            </View>
+
+                    <View style={[styles.inputWrapper, prompt && styles.inputActive]}>
+                        <TextInput
+                            placeholder="A blue lion logo reading 'HEXA' in bold letters"
+                            placeholderTextColor="#71717A"
+                            style={styles.textInput}
+                            multiline
+                            maxLength={500}
+                            numberOfLines={10}
+                            value={prompt}
+                            onChangeText={setPrompt}
+                        />
+                        <Text style={styles.counter}>{prompt.length}/500</Text>
+                    </View>
+
+                    <Text style={styles.styleLabel}>Logo Styles</Text>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        <View style={styles.styleRow}>
+                            {logoStyles.map((style) => (
+                                <TouchableOpacity
+                                    key={style.id}
+                                    onPress={() => setSelectedStyle(style.id)}
+                                >
+                                    <Image
+                                        source={{ uri: style.imageUrl }}
+                                        style={styles.styleImage}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.styleName,
+                                            selectedStyle === style.id && styles.selectedStyleText
+                                        ]}
+                                    >
+                                        {style.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </ScrollView>
+
+                    <LinearGradient
+                        start={{ x: 1, y: 0 }}
+                        end={{ x: 0, y: 0 }}
+                        colors={['#943DFF', '#2938DC']}
+                        style={styles.createButton}>
+                        <TouchableOpacity
+                            onPress={callCloudFunction}
+                        >
+                            <Text style={styles.createButtonText}>Create ✨</Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                </View>
+            </ImageBackground>
         </SafeAreaView>
     );
 }
@@ -148,6 +165,10 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#0b0b25',
+    },
+    background: {
+        flex: 1,
+        justifyContent: 'center',
     },
     container: {
         flex: 1,

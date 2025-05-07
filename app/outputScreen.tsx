@@ -7,7 +7,7 @@ export default function OutputScreen() {
     const router = useRouter();
 
     const handleCopy = () => {
-        // Copy prompt to clipboard logic
+        // Clipboard logic
     };
 
     return (

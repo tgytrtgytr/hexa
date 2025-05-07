@@ -80,7 +80,7 @@ export default function Index() {
                     <Text style={{ fontSize: 25, fontWeight: '600', color: 'white' }}>
                         Enter Your Prompt
                     </Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={()=> router.push('/screens/SurpriseMeGameScreen')}>
                         <Text style={{color:'white', alignItems:'center'}}>🎲 Surprise me</Text>
                     </TouchableOpacity>
                 </View>

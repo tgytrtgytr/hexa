@@ -5,6 +5,10 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const SurpriseMeGameScreen = () => {
+    const [score, setScore] = useState(0);
+    const [rewardShown, setRewardShown] = useState(false);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
     const obstacleAnim = useRef<Animated.CompositeAnimation | null>(null);
     const [jumping, setJumping] = useState(false);
     const [obstacleLeft, setObstacleLeft] = useState(new Animated.Value(screenWidth));
@@ -15,7 +19,22 @@ const SurpriseMeGameScreen = () => {
     const jumpHeight = 250;
     const groundLevel = 0;
 
+    const startTimer = () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+            setScore((prev) => {
+                if (prev + 1 >= 5 && !rewardShown) {
+                    setRewardShown(true);
+                }
+                return prev + 1;
+            });
+        }, 1000);
+    };
+
     const resetGame = () => {
+        setScore(0);
+        setRewardShown(false);
+        startTimer();
         setGameOver(false);
         playerBottom.setValue(0);
         obstacleLeft.setValue(screenWidth);
@@ -40,7 +59,13 @@ const SurpriseMeGameScreen = () => {
         return () => clearInterval(interval);
     }, []);
 
-
+    useEffect(() => {
+        startObstacle();
+        startTimer();
+        return () => {
+            timerRef.current && clearInterval(timerRef.current);
+        };
+    }, []);
 
     const startObstacle = () => {
         Animated.loop(
@@ -62,6 +87,7 @@ const SurpriseMeGameScreen = () => {
             ) {
                 setGameOver(true);
                 obstacleAnim.current?.stop();
+                timerRef.current && clearInterval(timerRef.current);
             }
         });
     };
@@ -87,6 +113,12 @@ const SurpriseMeGameScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>🎉 Surprise Me Game</Text>
+            <Text style={styles.scoreText}>⏱ Score: {score}</Text>
+
+            {gameOver && !rewardShown && <Text style={styles.failText}>Sorry you couldnot reach 5 seconds!</Text>}
+            {rewardShown && (
+                <Text style={styles.rewardText}>🎁 You earned a free image generation!</Text>
+            )}
 
             <View style={styles.gameArea}>
                 <Animated.View
@@ -174,6 +206,23 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         backgroundColor: '#FF6347',
         borderRadius: 10,
+    },
+    scoreText: {
+        fontSize: 18,
+        marginTop: 10,
+        color: 'white',
+    },
+    rewardText: {
+        fontSize: 20,
+        color: 'green',
+        marginTop: 10,
+        fontWeight: 'bold',
+    },
+    failText: {
+        fontSize: 20,
+        color: 'red',
+        marginTop: 10,
+        fontWeight: 'bold',
     },
 });
 

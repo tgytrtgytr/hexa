@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
     View,
@@ -7,31 +7,13 @@ import {
     TouchableOpacity,
     ScrollView,
     Image,
-    SafeAreaView, StyleSheet,
+    SafeAreaView,
+    StyleSheet,
 } from 'react-native';
+import { db } from '@/firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import DesignStatusCard from "@/app/components/DesignStatusCard";
-const logoStyles = [
-    {
-        id: 'no-style',
-        name: 'No Style',
-        icon: require('../assets/images/logo_styles/no-style.png'),
-    },
-    {
-        id: 'monogram',
-        name: 'Monogram',
-        icon: require('../assets/images/logo_styles/monogram.png'),
-    },
-    {
-        id: 'abstract',
-        name: 'Abstract',
-        icon: require('../assets/images/logo_styles/abstract.png'),
-    },
-    {
-        id: 'mascot',
-        name: 'Mascot',
-        icon: require('../assets/images/logo_styles/mascot.png'),
-    },
-];
 
 export default function Index() {
     const [loading, setLoading] = useState(false);
@@ -39,7 +21,35 @@ export default function Index() {
     const [responseMessage, setResponseMessage] = useState('');
     const [error, setError] = useState(false);
     const [selectedStyle, setSelectedStyle] = useState('no-style');
+
+    // temp logo until style info gathered
+    const tempLogo = [{
+        name: 'No Style',
+        imageUrl: '../assets/images/logo_styles/no-style.png',
+        id: 'no-style'
+    }]
+
+    const [logoStyles, setLogoStyles] = useState<any[]>(tempLogo);
+
     const router = useRouter();
+    const storage = getStorage();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const colRef = collection(db, 'logoStyles');
+            const snapshot = await getDocs(colRef);
+            const items = await Promise.all(
+                snapshot.docs.map(async (doc) => {
+                    const data = doc.data();
+                    const imageRef = ref(storage, data.imageUrl);
+                    const url = await getDownloadURL(imageRef);
+                    return { ...data, imageUrl: url };
+                })
+            );
+            setLogoStyles(items);
+        };
+        fetchData();
+    }, []);
 
     const callCloudFunction = async () => {
         setError(false);
@@ -62,83 +72,59 @@ export default function Index() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#0b0b25' }}>
-            <View style={{ flex:1, padding: 20 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white', textAlign: 'center', marginBottom: 40 }}>
-                    AI Logo
-                </Text>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <Text style={styles.heading}>AI Logo</Text>
 
                 {loading && <DesignStatusCard status="loading" />}
+                {responseMessage && (
+                    <DesignStatusCard
+                        status="success"
+                        onPress={() => router.push('/outputScreen')}
+                        image={require('../assets/images/logo_styles/mock_result.png')}
+                    />
+                )}
+                {error && <DesignStatusCard status="error" onPress={() => {}} />}
 
-                {/* Or for success */}
-                {responseMessage && <DesignStatusCard status="success" onPress={() => router.push('/outputScreen')} image={require('../assets/images/logo_styles/mock_result.png')} />}
-
-                {/* Or for error */}
-                {error && <DesignStatusCard status="error" onPress={()=>{}} />}
-
-                <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
-                    <Text style={{ fontSize: 25, fontWeight: '600', color: 'white' }}>
-                        Enter Your Prompt
-                    </Text>
-                    <TouchableOpacity onPress={()=> router.push('/screens/SurpriseMeGameScreen')}>
-                        <Text style={{color:'white', alignItems:'center'}}>🎲 Surprise me</Text>
+                <View style={styles.promptHeader}>
+                    <Text style={styles.subheading}>Enter Your Prompt</Text>
+                    <TouchableOpacity onPress={() => router.push('/screens/SurpriseMeGameScreen')}>
+                        <Text style={styles.surpriseMe}>🎲 Surprise me</Text>
                     </TouchableOpacity>
                 </View>
 
-                <View
-                    style={[{
-                        backgroundColor: '#27272A',
-                        borderRadius: 16,
-                        padding: 16,
-                        marginBottom: 24
-                    },prompt?{borderColor: 'white', borderWidth: 1}:{}]}
-                >
+                <View style={[styles.inputWrapper, prompt && styles.inputActive]}>
                     <TextInput
                         placeholder="A blue lion logo reading 'HEXA' in bold letters"
                         placeholderTextColor="#71717A"
-                        style={{
-                            color: 'white',
-                            fontSize: 18,
-                            marginBottom:20,
-                            minHeight: 150,
-                            textAlignVertical: 'top',
-                        }}
+                        style={styles.textInput}
                         multiline
                         maxLength={500}
                         numberOfLines={10}
                         value={prompt}
                         onChangeText={setPrompt}
                     />
-                    <Text style={styles.counter}>{prompt.length + '/500'}</Text>
+                    <Text style={styles.counter}>{prompt.length}/500</Text>
                 </View>
 
-                <Text style={{ fontSize: 22, fontWeight: '600', color: 'white', marginBottom: 10 }}>
-                    Logo Styles
-                </Text>
+                <Text style={styles.styleLabel}>Logo Styles</Text>
 
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-
-                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+                    <View style={styles.styleRow}>
                         {logoStyles.map((style) => (
                             <TouchableOpacity
                                 key={style.id}
                                 onPress={() => setSelectedStyle(style.id)}
                             >
                                 <Image
-                                    source={style.icon}
-                                    style={{
-                                        borderWidth: 1,
-                                        borderRadius: 12,
-                                        width: 100,
-                                        height: 100,
-                                        marginBottom: 6
-                                    }} />
+                                    source={{ uri: style.imageUrl }}
+                                    style={styles.styleImage}
+                                />
                                 <Text
-                                    style={{
-                                        fontSize: 12,
-                                        color: selectedStyle === style.id ? 'white' : '#71717A',
-                                        textAlign: 'center',
-                                    }}
+                                    style={[
+                                        styles.styleName,
+                                        selectedStyle === style.id && styles.selectedStyleText
+                                    ]}
                                 >
                                     {style.name}
                                 </Text>
@@ -146,37 +132,64 @@ export default function Index() {
                         ))}
                     </View>
                 </ScrollView>
+
                 <TouchableOpacity
                     onPress={callCloudFunction}
-                    style={{
-                        justifyContent:'flex-end',
-                        backgroundColor: '#6943ff',
-                        paddingVertical: 16,
-                        borderRadius: 30,
-                        alignItems: 'center',
-                    }}
+                    style={styles.createButton}
                 >
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-                        Create ✨
-                    </Text>
+                    <Text style={styles.createButtonText}>Create ✨</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
-
 }
 
 const styles = StyleSheet.create({
-    container: {
-        position: 'relative',
-        width: '80%',
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#0b0b25',
     },
-    input: {
+    container: {
+        flex: 1,
+        padding: 20,
+    },
+    heading: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+        textAlign: 'center',
+        marginBottom: 40,
+    },
+    promptHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    subheading: {
+        fontSize: 25,
+        fontWeight: '600',
+        color: 'white',
+    },
+    surpriseMe: {
+        color: 'white',
+    },
+    inputWrapper: {
+        backgroundColor: '#27272A',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 24,
+        position: 'relative',
+    },
+    inputActive: {
+        borderColor: 'white',
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        padding: 10,
-        fontSize: 16,
+    },
+    textInput: {
+        color: 'white',
+        fontSize: 18,
+        minHeight: 150,
+        textAlignVertical: 'top',
     },
     counter: {
         position: 'absolute',
@@ -184,5 +197,42 @@ const styles = StyleSheet.create({
         left: 15,
         fontSize: 14,
         color: 'gray',
+    },
+    styleLabel: {
+        fontSize: 22,
+        fontWeight: '600',
+        color: 'white',
+        marginBottom: 10,
+    },
+    styleRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginBottom: 32,
+    },
+    styleImage: {
+        borderWidth: 1,
+        borderRadius: 12,
+        width: 100,
+        height: 100,
+        marginBottom: 6,
+    },
+    styleName: {
+        fontSize: 12,
+        color: '#71717A',
+        textAlign: 'center',
+    },
+    selectedStyleText: {
+        color: 'white',
+    },
+    createButton: {
+        backgroundColor: '#6943ff',
+        paddingVertical: 16,
+        borderRadius: 30,
+        alignItems: 'center',
+    },
+    createButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 });
